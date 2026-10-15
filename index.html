@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>I like jenga: jenga</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero" aria-labelledby="page-title">
+        <p class="eyebrow">Cousin game night</p>
+        <h1 id="page-title">I like jenga: <span>jenga</span></h1>
+        <p class="intro">Build the tower, keep it steady, and get ready for silly dares.</p>
+      </section>
+
+      <section class="game-card" aria-label="Wooden Jenga block stack">
+        <div class="card-topline">
+          <div>
+            <p class="label">Task 1</p>
+            <h2>Build the stack</h2>
+          </div>
+          <span class="save-badge" id="save-badge">Saved on this computer</span>
+        </div>
+
+        <div class="stage">
+          <div class="stack" id="stack" aria-label="A stack of wooden blocks"></div>
+          <div class="table-shadow" aria-hidden="true"></div>
+        </div>
+
+        <div class="tip">
+          <span class="tip-icon" aria-hidden="true">✦</span>
+          <p><strong>Game night tip:</strong> Take turns pulling blocks carefully. The dares are coming next!</p>
+        </div>
+      </section>
+
+      <p class="privacy-note">Saves on this computer only for now</p>
+    </main>
+    <script src="storage.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
