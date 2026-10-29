@@ -21,6 +21,8 @@ https://emmahong6666-lab.github.io/i-like-jenga-jenga/
 ## What’s done
 
 - Built a cat tower with 18 cat blocks.
+- Spaced cats so they do not overlap at the start.
+- Added nudging: moving one cat into another can make the tower fall.
 - Players can remove middle cats safely, while unsafe pulls topple the tower.
 - Added a win state after 5 safe removals.
 - Added a few made-up dare items for the next feature.

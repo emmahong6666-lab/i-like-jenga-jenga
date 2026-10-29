@@ -4,9 +4,9 @@ const stack = document.querySelector('#stack');
 const saveBadge = document.querySelector('#save-badge');
 const gameStatus = document.querySelector('#game-status');
 const blocks = [];
-const blockWidth = 85;
+const blockWidth = 74;
 const blockHeight = 42;
-const blockGap = 4;
+const blockGap = 8;
 const gravity = 980;
 const catsToWin = 5;
 let activeBlock = null;
@@ -32,16 +32,15 @@ function createStack() {
   for (let level = 0; level < gameData.stackLevels; level += 1) {
     for (let index = 0; index < 3; index += 1) {
       const piece = document.createElement('div');
-      const vertical = level % 2 === 1;
-      const x = vertical ? towerLeft + index * 31 + 27 : towerLeft + index * (blockWidth + blockGap);
-      const y = vertical ? floor - level * 47 - blockHeight - 21 : floor - level * 47 - blockHeight;
+      const x = towerLeft + index * (blockWidth + blockGap) + (level % 2 === 1 ? 4 : 0);
+      const y = floor - level * 54 - blockHeight;
 
       piece.className = 'block';
       piece.setAttribute('aria-label', `Cat ${index + 1} on level ${level + 1}`);
       piece.setAttribute('draggable', 'false');
       stack.appendChild(piece);
 
-      const block = { element: piece, x, y, vx: 0, vy: 0, angle: vertical ? 90 : 0, level, startX: x, dragging: false };
+      const block = { element: piece, x, y, vx: 0, vy: 0, angle: 0, level, startX: x, startY: y, dragging: false, nudgedOthers: false };
       blocks.push(block);
       placeBlock(block);
       piece.addEventListener('pointerdown', (event) => startDrag(event, block));
@@ -82,7 +81,23 @@ function dragBlock(event) {
   activeBlock.vy = (pointer.y - activeBlock.lastPointerY) * 8;
   activeBlock.lastPointerX = pointer.x;
   activeBlock.lastPointerY = pointer.y;
+  nudgeNearby(activeBlock);
   placeBlock(activeBlock);
+}
+
+function nudgeNearby(movingBlock) {
+  for (const other of blocks) {
+    if (other === movingBlock || other.removed || !overlap(movingBlock, other)) continue;
+    const direction = other.x >= movingBlock.x ? 1 : -1;
+    other.vx += direction * 170;
+    other.vy -= 110;
+    other.element.classList.add('nudged');
+    movingBlock.nudgedOthers = true;
+    collapseStarted = true;
+    physicsStarted = true;
+    gameStatus.textContent = 'You nudged another cat — steady the tower!';
+    gameStatus.classList.add('danger');
+  }
 }
 
 function endDrag() {
@@ -93,7 +108,7 @@ function endDrag() {
   block.element.removeEventListener('pointermove', dragBlock);
   const pulledOut = Math.abs(block.x - block.dragStartX) > 55;
   const isMiddleCat = block.level > 0 && block.level < gameData.stackLevels - 1;
-  if (pulledOut && isMiddleCat) {
+  if (pulledOut && isMiddleCat && !block.nudgedOthers) {
     removeCat(block);
   } else if (pulledOut) {
     gameStatus.textContent = 'That cat was supporting the tower — it fell! Reload to try again.';
