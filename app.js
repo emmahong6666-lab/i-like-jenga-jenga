@@ -1,6 +1,7 @@
 const gameData = loadGameData();
 const stage = document.querySelector('.stage');
 const stack = document.querySelector('#stack');
+const supportLines = document.querySelector('#support-lines');
 const saveBadge = document.querySelector('#save-badge');
 const gameStatus = document.querySelector('#game-status');
 const blocks = [];
@@ -15,6 +16,30 @@ let collapseStarted = false;
 let physicsStarted = false;
 let removedCats = 0;
 let gameOver = false;
+const catColors = ['#ec806e', '#6da5a6', '#e5a94f'];
+
+function catArtwork(color) {
+  return `<svg class="cat-art" viewBox="0 0 80 60" role="img" aria-label="Illustrated cat">
+    <path class="cat-tail" d="M62 42c15 5 17-16 6-19" fill="none" stroke="${color}" stroke-width="7" stroke-linecap="round"/>
+    <path d="M18 40c0-13 8-22 22-22s22 9 22 22H18Z" fill="${color}"/>
+    <path d="M25 21 24 8l11 9m20 4 2-13-11 9" fill="${color}" stroke="#523d35" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="34" cy="24" r="2.5" fill="#33261f"/><circle cx="47" cy="24" r="2.5" fill="#33261f"/>
+    <path d="M38 30q3 3 6 0M22 30l-9-2m9 6-9 1m43-5 9-2m-9 6 9 1" fill="none" stroke="#523d35" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M28 40v7m20-7v7" stroke="#523d35" stroke-width="3" stroke-linecap="round"/>
+  </svg>`;
+}
+
+function createSupportLines(towerLeft, towerWidth, floor) {
+  supportLines.replaceChildren();
+  for (let level = 1; level < gameData.stackLevels; level += 1) {
+    const line = document.createElement('div');
+    line.className = 'support-line';
+    line.style.left = `${towerLeft - 12}px`;
+    line.style.top = `${floor - level * 54 - 6}px`;
+    line.style.width = `${towerWidth + 24}px`;
+    supportLines.appendChild(line);
+  }
+}
 
 function placeBlock(block) {
   block.element.style.left = `${block.x}px`;
@@ -28,6 +53,7 @@ function createStack() {
   const towerWidth = 3 * blockWidth + 2 * blockGap;
   const towerLeft = (stageWidth - towerWidth) / 2;
   const floor = stageHeight - 48;
+  createSupportLines(towerLeft, towerWidth, floor);
 
   for (let level = 0; level < gameData.stackLevels; level += 1) {
     for (let index = 0; index < 3; index += 1) {
@@ -38,6 +64,7 @@ function createStack() {
       piece.className = 'block';
       piece.setAttribute('aria-label', `Cat ${index + 1} on level ${level + 1}`);
       piece.setAttribute('draggable', 'false');
+      piece.innerHTML = catArtwork(catColors[(level + index) % catColors.length]);
       stack.appendChild(piece);
 
       const block = { element: piece, x, y, vx: 0, vy: 0, angle: 0, level, startX: x, startY: y, dragging: false, nudgedOthers: false };
@@ -161,6 +188,7 @@ function moveBlocks(delta) {
       block.y = floor - blockHeight;
       block.vy *= -0.22;
       block.vx *= 0.86;
+      if (!block.exploded) explodeCatAtBottom(block);
     }
   }
 
@@ -181,16 +209,26 @@ function moveBlocks(delta) {
   for (const block of blocks) placeBlock(block);
 }
 
-function explodeTower() {
-  if (!collapseStarted) return;
-  collapseStarted = false;
-  for (const block of blocks) {
-    if (block.removed) continue;
-    block.vx += (block.x < stage.clientWidth / 2 ? -1 : 1) * (120 + Math.random() * 180);
-    block.vy -= 180 + Math.random() * 220;
-    block.element.classList.add('exploding');
+function explodeCatAtBottom(block) {
+  block.exploded = true;
+  block.removed = true;
+  block.element.style.visibility = 'hidden';
+  const bounds = stage.getBoundingClientRect();
+  const centerX = block.x + blockWidth / 2;
+  const centerY = block.y + blockHeight / 2;
+  for (let index = 0; index < 12; index += 1) {
+    const particle = document.createElement('span');
+    particle.className = 'particle';
+    particle.style.left = `${centerX}px`;
+    particle.style.top = `${centerY}px`;
+    particle.style.setProperty('--dx', `${(Math.random() - 0.5) * 110}px`);
+    particle.style.setProperty('--dy', `${-20 - Math.random() * 70}px`);
+    particle.style.setProperty('--delay', `${Math.random() * 80}ms`);
+    stage.appendChild(particle);
+    window.setTimeout(() => particle.remove(), 850);
   }
-  window.setTimeout(() => blocks.forEach((block) => block.element.classList.remove('exploding')), 900);
+  gameStatus.textContent = 'A cat hit the floor and burst into particles! Reload to try again.';
+  gameStatus.classList.add('danger');
 }
 
 function animate(now) {
@@ -198,7 +236,6 @@ function animate(now) {
   lastFrame = now;
   if (physicsStarted) {
     moveBlocks(delta);
-    if (!activeBlock && collapseStarted) explodeTower();
   }
   requestAnimationFrame(animate);
 }

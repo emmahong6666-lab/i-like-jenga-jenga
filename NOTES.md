@@ -22,7 +22,10 @@ https://emmahong6666-lab.github.io/i-like-jenga-jenga/
 
 - Built a cat tower with 18 cat blocks.
 - Spaced cats so they do not overlap at the start.
+- Added fixed support lines between the cat rows.
+- Replaced emoji cats with small illustrated SVG cats.
 - Added nudging: moving one cat into another can make the tower fall.
+- Falling cats turn into particles only when they touch the bottom.
 - Players can remove middle cats safely, while unsafe pulls topple the tower.
 - Added a win state after 5 safe removals.
 - Added a few made-up dare items for the next feature.
