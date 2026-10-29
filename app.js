@@ -2,15 +2,19 @@ const gameData = loadGameData();
 const stage = document.querySelector('.stage');
 const stack = document.querySelector('#stack');
 const saveBadge = document.querySelector('#save-badge');
+const gameStatus = document.querySelector('#game-status');
 const blocks = [];
 const blockWidth = 85;
-const blockHeight = 28;
+const blockHeight = 42;
 const blockGap = 4;
 const gravity = 980;
+const catsToWin = 5;
 let activeBlock = null;
 let lastFrame = performance.now();
 let collapseStarted = false;
 let physicsStarted = false;
+let removedCats = 0;
+let gameOver = false;
 
 function placeBlock(block) {
   block.element.style.left = `${block.x}px`;
@@ -30,10 +34,10 @@ function createStack() {
       const piece = document.createElement('div');
       const vertical = level % 2 === 1;
       const x = vertical ? towerLeft + index * 31 + 27 : towerLeft + index * (blockWidth + blockGap);
-      const y = vertical ? floor - level * 31 - blockHeight - 28 : floor - level * 31 - blockHeight;
+      const y = vertical ? floor - level * 47 - blockHeight - 21 : floor - level * 47 - blockHeight;
 
       piece.className = 'block';
-      piece.setAttribute('aria-label', `Wooden block ${index + 1} on level ${level + 1}`);
+      piece.setAttribute('aria-label', `Cat ${index + 1} on level ${level + 1}`);
       piece.setAttribute('draggable', 'false');
       stack.appendChild(piece);
 
@@ -51,8 +55,8 @@ function pointerPosition(event) {
 }
 
 function startDrag(event, block) {
+  if (gameOver || block.removed) return;
   event.preventDefault();
-  physicsStarted = true;
   activeBlock = block;
   const pointer = pointerPosition(event);
   block.dragging = true;
@@ -87,8 +91,38 @@ function endDrag() {
   block.dragging = false;
   block.element.classList.remove('dragging');
   block.element.removeEventListener('pointermove', dragBlock);
-  if (block.level < 4 && Math.abs(block.x - block.dragStartX) > 55) collapseStarted = true;
+  const pulledOut = Math.abs(block.x - block.dragStartX) > 55;
+  const isMiddleCat = block.level > 0 && block.level < gameData.stackLevels - 1;
+  if (pulledOut && isMiddleCat) {
+    removeCat(block);
+  } else if (pulledOut) {
+    gameStatus.textContent = 'That cat was supporting the tower — it fell! Reload to try again.';
+    gameStatus.classList.add('danger');
+    collapseStarted = true;
+    physicsStarted = true;
+  } else {
+    block.x = block.startX;
+    block.y = block.startY;
+    block.vx = 0;
+    block.vy = 0;
+    placeBlock(block);
+  }
   activeBlock = null;
+}
+
+function removeCat(block) {
+  block.removed = true;
+  block.element.classList.add('removed');
+  block.element.setAttribute('aria-hidden', 'true');
+  block.element.style.display = 'none';
+  removedCats += 1;
+  if (removedCats >= catsToWin) {
+    gameOver = true;
+    gameStatus.textContent = 'You win! The cat tower is still standing. 🐱';
+    gameStatus.classList.add('success');
+  } else {
+    gameStatus.textContent = `${catsToWin - removedCats} middle cats left to remove safely.`;
+  }
 }
 
 function overlap(first, second) {
@@ -98,7 +132,7 @@ function overlap(first, second) {
 function moveBlocks(delta) {
   const floor = stage.clientHeight - 48;
   for (const block of blocks) {
-    if (block.dragging) continue;
+    if (block.dragging || block.removed) continue;
     block.vy += gravity * delta;
     block.x += block.vx * delta;
     block.y += block.vy * delta;
@@ -117,10 +151,10 @@ function moveBlocks(delta) {
 
   for (let firstIndex = 0; firstIndex < blocks.length; firstIndex += 1) {
     const first = blocks[firstIndex];
-    if (first.dragging) continue;
+    if (first.dragging || first.removed) continue;
     for (let secondIndex = firstIndex + 1; secondIndex < blocks.length; secondIndex += 1) {
       const second = blocks[secondIndex];
-      if (second.dragging || !overlap(first, second)) continue;
+      if (second.dragging || second.removed || !overlap(first, second)) continue;
       const upper = first.y <= second.y ? first : second;
       const lower = upper === first ? second : first;
       upper.y = lower.y - blockHeight;
@@ -136,6 +170,7 @@ function explodeTower() {
   if (!collapseStarted) return;
   collapseStarted = false;
   for (const block of blocks) {
+    if (block.removed) continue;
     block.vx += (block.x < stage.clientWidth / 2 ? -1 : 1) * (120 + Math.random() * 180);
     block.vy -= 180 + Math.random() * 220;
     block.element.classList.add('exploding');

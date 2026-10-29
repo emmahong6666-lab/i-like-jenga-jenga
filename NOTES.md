@@ -20,8 +20,9 @@ https://emmahong6666-lab.github.io/i-like-jenga-jenga/
 
 ## What’s done
 
-- Built the first wooden Jenga block stack.
-- Added draggable blocks with 2D gravity and a playful collapse effect.
+- Built a cat tower with 18 cat blocks.
+- Players can remove middle cats safely, while unsafe pulls topple the tower.
+- Added a win state after 5 safe removals.
 - Added a few made-up dare items for the next feature.
 - Saved the sample items and stack settings in the browser with `localStorage`.
 - Kept browser saving in `storage.js` so it can be swapped for a real database later.
@@ -30,5 +31,5 @@ Saves on this computer only for now
 
 ## What’s next
 
-1. Show a dare card after a block is pulled.
+1. Show a dare card after a cat is pulled.
 2. Publish the game so cousins can play from their own devices.

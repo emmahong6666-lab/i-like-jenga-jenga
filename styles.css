@@ -43,16 +43,20 @@ h2 { margin: 0; font-size: clamp(1.7rem, 4vw, 2.5rem); letter-spacing: -.035em; 
 .stage::before { width: 390px; height: 390px; transform: translate(-35%, -28%); }
 .stage::after { width: 290px; height: 290px; transform: translate(60%, 40%); }
 .stack { position: absolute; inset: 0; z-index: 1; }
-.block { position: absolute; width: 85px; height: 28px; border: 1px solid rgba(124, 72, 33, .34); border-radius: 6px 6px 4px 4px; background: linear-gradient(180deg, var(--wood-light) 0%, var(--wood) 70%, #c68248 100%); box-shadow: inset 0 2px 0 rgba(255,255,255,.42), 0 3px 0 var(--wood-dark), 0 7px 8px rgba(112, 68, 39, .15); cursor: grab; touch-action: none; user-select: none; will-change: left, top, transform; }
+.block { position: absolute; display: grid; place-items: center; width: 85px; height: 42px; border: 1px solid rgba(124, 72, 33, .34); border-radius: 12px; background: linear-gradient(180deg, #ffe0ad 0%, #eeb16f 70%, #cb8247 100%); box-shadow: inset 0 2px 0 rgba(255,255,255,.42), 0 3px 0 var(--wood-dark), 0 7px 8px rgba(112, 68, 39, .15); cursor: grab; touch-action: none; user-select: none; will-change: left, top, transform; font-size: 1.45rem; }
+.block::before { content: '🐱'; line-height: 1; filter: drop-shadow(0 1px 0 rgba(255,255,255,.5)); }
 .block.dragging { z-index: 5; cursor: grabbing; filter: saturate(1.15) brightness(1.06); box-shadow: 0 12px 18px rgba(112, 68, 39, .28); }
 .block.exploding { animation: block-pop .9s ease-out; }
-.block::after { position: absolute; content: ''; left: 12px; right: 12px; top: 9px; height: 1px; background: rgba(137, 78, 37, .24); box-shadow: 30px 5px 0 rgba(255,245,208,.27); }
+.block.removed { opacity: 0; pointer-events: none; }
 @keyframes block-pop { 0% { filter: saturate(1); } 25% { filter: saturate(2) brightness(1.25); } 100% { filter: saturate(1); } }
 .table-shadow { position: absolute; bottom: 43px; width: 280px; height: 24px; border-radius: 50%; background: rgba(123, 67, 39, .2); filter: blur(8px); }
 .tip { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 15px; background: #fff3e5; }
 .tip-icon { display: grid; flex: 0 0 31px; place-items: center; width: 31px; height: 31px; color: #fff; border-radius: 50%; background: var(--coral); }
 .tip p { margin: 0; color: var(--muted); font-size: .88rem; line-height: 1.5; }
 .tip strong { color: var(--ink); }
+.game-status { margin: 16px 0 0; color: var(--muted); text-align: center; font-size: .88rem; font-weight: 700; }
+.game-status.success { color: #47724c; }
+.game-status.danger { color: var(--coral); }
 .privacy-note { margin: 20px 0 0; color: var(--muted); text-align: center; font-size: .8rem; }
 
 @media (max-width: 560px) {
