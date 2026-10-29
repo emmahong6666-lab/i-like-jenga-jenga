@@ -12,7 +12,10 @@ Then visit `http://localhost:8000` in a browser.
 
 ## Where it’s published
 
-Nowhere yet. This first version runs on this computer only.
+The project files are stored in the private GitHub repository:
+https://github.com/emmahong6666-lab/i-like-jenga-jenga
+
+The game itself still runs locally on this computer; it is not deployed as a public website yet.
 
 ## What’s done
 
